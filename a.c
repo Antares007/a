@@ -33,13 +33,13 @@ L2(F, F0, F1)
 #include <stdio.h>
 
 #include <string.h>
-void noop(void *key) {}
-void noop2(void *id, void *key) {}
+void noop(void *k) {}
+void noop2(void *k, void *d) {}
 
 void p(void *tree, const char *type, ...) {
   va_list args;
   va_start(args, type);
-  printf("b %ld\n", (long)tree);
+  printf("b %d\n", (int)tree);
   if (type[0] == 'L') {
     int v = va_arg(args, int);
     printf("%s %d\n", type, v);
@@ -47,20 +47,6 @@ void p(void *tree, const char *type, ...) {
     if (t)
       t(p, tree);
   } else if (type[0] == 'R') {
-    //
-  }
-  va_end(args);
-}
-
-void concat_pith(void *s, const char *type, ...) {
-  va_list args;
-  va_start(args, type);
-  if (type[0] == 'L') {
-    int v = va_arg(args, int);
-    printf("%s %d\n", type, v);
-    bark t = va_arg(args, bark);
-    if (t)
-      t(p, s);
   }
   va_end(args);
 }
@@ -71,8 +57,8 @@ void avl(void (*o)(avl_tree_t *), avl_comparator_t cmp,
          avl_key_destructor_t dkey);
 
 void avl_ring(avl_tree_t *tree) {
-  printf("a %ld\n", (long)&tree);
-  list(p, &tree);
+  printf("a %d\n", (int)tree);
+  list(p, tree);
 }
 
 int main(void) { avl(avl_ring, (avl_comparator_t)strcmp, noop); }

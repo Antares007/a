@@ -1,4 +1,2 @@
--std=c89
+-std=c90
 -Wall
--Wextra
--Wpedantic
