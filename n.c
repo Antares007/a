@@ -22,45 +22,53 @@ void rparen() {}
 
 void expr(pith, void *);
 void term(pith, void *);
-NA(term, term, (void *)0)
+void factor(pith, void *);
 
 NT(plus)
+NT(mul)
+NT(lparen)
+NT(rparen)
+NT(id)
+
 NG(noop)
+
 NC(term, Gnoop)
 NC(Tplus, CtermGnoop)
 NC(expr, CTplusCtermGnoop)
 NA(expr, CexprCTplusCtermGnoop, CtermGnoop)
 
-/*
-N(T_, T);
-NN(plus, T_)
-NN(E, plusT_)
-N(E_, T_)
-NN(EplusT_, E_)
+NC(factor, Gnoop)
+NC(Tmul, CfactorGnoop)
+NC(term, CTmulCfactorGnoop)
+NA(term, CtermCTmulCfactorGnoop, CfactorGnoop)
 
-N(TF, F);
-NN(mulF, _mul, TF)
-NN(TmulF, T, mulF)
-NN(T, TmulF, TF)
+NC(Trparen, Gnoop)
+NC(expr, CTrparenGnoop)
+NC(Tlparen, CexprCTrparenGnoop)
+NC(Tid, Gnoop)
+NA(factor, CTlparenCexprCTrparenGnoop, CTidGnoop)
 
-N(rparen, _rparen);
-NN(Erparen, E, rparen)
-NN(lparenErparen, _lparen, Erparen)
-N(id, _id)
-N(F1, id)
-NN(F, lparenErparen, F1)
-*/
 #include "avl.h"
 #include <stdio.h>
 #include <string.h>
 
+static int ident = 0;
+void print(const char *s) {
+  int i = ident;
+  while (i--)
+    printf(". . ");
+  printf("%s\n", s);
+}
+
 void p(void *s, n_t *n, void *h, void *t) {
   avl_tree_t *tree = (avl_tree_t *)s;
+  avl_insert(tree, n->p, n->p);
   const char type = n->n[0];
-  printf("%s\n", n->n);
+  print(n->n);
   if (type != 'G' && type != 'T' && !avl_search(tree, h)) {
-    avl_insert(tree, h, h);
+    ident++;
     ((bark)h)(p, s);
+    ident--;
   }
   if (t)
     ((bark)t)(p, s);
