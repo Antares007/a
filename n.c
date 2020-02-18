@@ -1,18 +1,12 @@
-typedef struct n_t {
-  const char *n;
-  void *p;
-} n_t;
-typedef void (*pith)(void *, n_t *, void *, void *);
-typedef void (*bark)(pith, void *);
+typedef void (*pith_t)(void *, const char *, void *, void *, void *);
+typedef void (*bark_t)(pith_t, void *);
 
-#define NA(name, a, b)                                                         \
-  void name(pith o, void *s) {                                                 \
-    n_t n = {#name, name};                                                     \
-    o(s, &n, a, b);                                                            \
-  }
+#define NA(n, a, b)                                                            \
+  void n(pith_t o, void *s) { o(s, #n, n, a, b); }
 #define NT(a) NA(T##a, a, (void *)0)
 #define NG(a) NA(G##a, a, (void *)0)
 #define NC(a, b) NA(C##a##b, a, b)
+
 void noop() {}
 void id() {}
 void plus() {}
@@ -20,9 +14,9 @@ void mul() {}
 void lparen() {}
 void rparen() {}
 
-void expr(pith, void *);
-void term(pith, void *);
-void factor(pith, void *);
+void expr(pith_t, void *);
+void term(pith_t, void *);
+void factor(pith_t, void *);
 
 NT(plus)
 NT(mul)
@@ -52,29 +46,35 @@ NA(factor, CTlparenCexprCTrparenGnoop, CTidGnoop)
 #include <stdio.h>
 #include <string.h>
 
-static int ident = 0;
-void print(const char *s) {
-  int i = ident;
-  while (i--)
+void print(int ident, const char *s) {
+  while (ident--)
     printf(". . ");
   printf("%s\n", s);
 }
 
-void p(void *s, n_t *n, void *h, void *t) {
-  avl_tree_t *tree = (avl_tree_t *)s;
-  avl_insert(tree, n->p, n->p);
-  const char type = n->n[0];
-  print(n->n);
-  if (type != 'G' && type != 'T' && !avl_search(tree, h)) {
-    ident++;
-    ((bark)h)(p, s);
-    ident--;
+typedef struct state_t {
+  int ident;
+  avl_tree_t *tree;
+} state_t;
+
+void print_pith(void *vs, const char *n, void *pid, void *h, void *t) {
+  state_t *s = (state_t *)vs;
+  avl_insert(s->tree, pid, pid);
+  const char type = n[0];
+  print(s->ident, n);
+  if (type != 'G' && type != 'T' && !avl_search(s->tree, h)) {
+    s->ident++;
+    ((bark_t)h)(print_pith, vs);
+    s->ident--;
   }
   if (t)
-    ((bark)t)(p, s);
+    ((bark_t)t)(print_pith, vs);
 }
 
-void avl_ring(avl_tree_t *tree) { expr(p, tree); }
+void avl_ring(avl_tree_t *tree) {
+  state_t state = {0, tree};
+  expr(print_pith, &state);
+}
 int main() {
   avl_bark(avl_ring, avl_ptrcmp, avl_void_key_destructor,
            avl_void_value_destructor);
