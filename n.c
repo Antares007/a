@@ -22,7 +22,7 @@ void rparen() {}
 
 void expr(pith, void *);
 void term(pith, void *);
-NA(term, (void *)0, (void *)0)
+NA(term, term, (void *)0)
 
 NT(plus)
 NG(noop)
@@ -31,7 +31,6 @@ NC(Tplus, CtermGnoop)
 NC(expr, CTplusCtermGnoop)
 NA(expr, CexprCTplusCtermGnoop, CtermGnoop)
 
-/* clang-format off */
 /*
 N(T_, T);
 NN(plus, T_)
@@ -51,24 +50,25 @@ N(id, _id)
 N(F1, id)
 NN(F, lparenErparen, F1)
 */
+#include "avl.h"
 #include <stdio.h>
-void g(void *s, n_t *n, void *h, void *t) {
-  printf("%s ", n->n);
-  if (t)
-    ((bark)t)(g, s);
-}
+#include <string.h>
+
 void p(void *s, n_t *n, void *h, void *t) {
+  avl_tree_t *tree = (avl_tree_t *)s;
+  const char type = n->n[0];
   printf("%s\n", n->n);
-  if(h){
-  ((bark)h)(p, s);
-  printf("\n");
+  if (type != 'G' && type != 'T' && !avl_search(tree, h)) {
+    avl_insert(tree, h, h);
+    ((bark)h)(p, s);
   }
   if (t)
     ((bark)t)(p, s);
 }
 
-
+void avl_ring(avl_tree_t *tree) { expr(p, tree); }
 int main() {
-  expr(p, 0);
+  avl_bark(avl_ring, avl_ptrcmp, avl_void_key_destructor,
+           avl_void_value_destructor);
   return 9;
 }

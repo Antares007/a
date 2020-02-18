@@ -53,17 +53,6 @@ void v_pith(void *s, const char *n, ...) {
   h(p_pith, s);
 }
 
-void avl(void (*o)(avl_tree_t *), avl_comparator_t cmp,
-         avl_key_destructor_t dkey);
-
 void avl_ring(avl_tree_t *tree) { E(v_pith, tree); }
 
-int main(void) { avl(avl_ring, (avl_comparator_t)strcmp, noop); }
-
-void avl(void (*o)(avl_tree_t *), avl_comparator_t cmp,
-         avl_key_destructor_t dkey) {
-  avl_tree_t tree;
-  avl_initialize(&tree, cmp, dkey);
-  o(&tree);
-  avl_destroy(&tree, noop2);
-}
+int main(void) { avl_bark(avl_ring, (avl_comparator_t)strcmp, noop, noop2); }

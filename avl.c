@@ -314,3 +314,15 @@ void AVL_NAME(free_data)(void *key, void *data) {
   AVL_FREE(key);
   AVL_FREE(data);
 }
+
+void AVL_NAME(bark)(void (*o)(AVL_NAME(tree_t) *),
+                    AVL_NAME(comparator_t) comparator,
+                    AVL_NAME(key_destructor_t) key_destructor,
+                    AVL_NAME(node_visitor_t) value_destructor) {
+  AVL_NAME(tree_t) tree;
+  AVL_NAME(initialize)(&tree, comparator, key_destructor);
+  o(&tree);
+  AVL_NAME(destroy)(&tree, value_destructor);
+}
+void AVL_NAME(void_key_destructor)(void *k) {}
+void AVL_NAME(void_value_destructor)(void *k, void *v) {}
