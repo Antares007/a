@@ -75,7 +75,10 @@ void avl_ring(avl_tree_t *tree) {
   state_t state = {0, tree};
   expr(print_pith, &state);
 }
+
 int main() {
+  int a[10] = {1, 2, 3, 4};
+  printf("%d", a[4]);
   avl_bark(avl_ring, avl_ptrcmp, avl_void_key_destructor,
            avl_void_value_destructor);
   return 9;
