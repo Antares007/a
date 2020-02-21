@@ -1,35 +1,39 @@
 #include "n6.c"
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 
 typedef void (*bark)(void *, pith_t, void *);
 
-void print_pith(void *b_, const char *n, void *h, void *t) { //
-  int *i = (int *)b_;
-  printf("%d(%s) ", *i, n);
-  ((int *)b_)[0]++;
-  if (n[0] == 'G') {
-    printf("\n");
-    *i = 0;
+bool contains(void **list, void *value) {
+  for (; list; list = list[1])
+    if (list[0] == value)
+      return true;
+  return false;
+}
+void traverse_pith(void *b_, const char *n, void *h, void *t) {
+  void **b = b_;
+  int *ident = b[0];
+  void **path = b[1];
+  for (int i = *ident; i > 0; i--)
+    printf(". . ");
+  printf("%s\n", n);
+  if (n[0] == 'A') {
+    b_ = (void *[]){b[0], (void *[]){h, path}};
+    (*ident)++;
+    if (!contains(path, h))
+      ((bark)h)(b_, traverse_pith, 0);
+    (*ident)--;
   }
   if (t)
-    ((bark)t)(b_, print_pith, 0);
+    ((bark)t)(b_, traverse_pith, 0);
 }
-void ag_pith(void *b_, const char *n, void *h, void *t) { //
-  void **b = b_;
-  pith_t p = b[0];
-  bark g = b[1];
-  g(b[2], p, 0);
-}
-void ag(void *b, pith_t o, void *g) {
-  ((bark)g)((void *[]){o, g, b}, ag_pith, 0);
-}
-void print(bark g) { //
-  int i = 0;
-  ag(&i, print_pith, g);
+void print(bark g) {
+  int ident = 0;
+  g((void *[]){&ident, (void *[]){g, 0}}, traverse_pith, 0);
 }
 int main() {
-  print(g41_A_expr);
+  print(g41_32);
   return 9;
 }
