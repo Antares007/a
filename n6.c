@@ -13,9 +13,9 @@ RGC(mul, '*')
 RGC(lparen, '(')
 RGC(rparen, ')')
 
-static void A(expr)(pith_t, void *);
-static void A(term)(pith_t, void *);
-static void A(fact)(pith_t, void *);
+static void A(expr)(void *, pith_t, void *);
+static void A(term)(void *, pith_t, void *);
+static void A(fact)(void *, pith_t, void *);
 
 static void G(noop)() {}
 // clang-format off

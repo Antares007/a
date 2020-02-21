@@ -9,7 +9,7 @@ typedef void (*pith_t)(void *, const char *, void *, void *);
 #define CCP(n) #n
 #define P CONCAT(N, __LINE__)
 #define S__(b, a, t, n)                                                        \
-  static void n(pith_t o, void *s) { o(s, #t, a, b); }
+  static void n(void *s, pith_t o, void *aa) { o(s, #t, a, b); }
 #define S_(b, a, t, n) S__(b, a, t, n)
 #define S(b, a, t, n) S_(b, t(a), CONCAT3(t, _, a), n)
 
