@@ -1,7 +1,6 @@
 #include "mb.h"
 
 #define N g41_
-
 RGB(id) {
   int i = 0;
   while ('a' <= b[i] && b[i] <= 'z')
@@ -12,12 +11,10 @@ RGC(plus, '+')
 RGC(mul, '*')
 RGC(lparen, '(')
 RGC(rparen, ')')
-
-static void A(expr)(void *, pith_t, void *);
-static void A(term)(void *, pith_t, void *);
-static void A(fact)(void *, pith_t, void *);
-
-static void G(noop)() {}
+void A(expr)(void *, pith_t, void *);
+void A(term)(void *, pith_t, void *);
+void A(fact)(void *, pith_t, void *);
+void G(noop)() {}
 // clang-format off
 S(0,  noop,   G,  P)S(P,   //
       id,     T,  P)S(P,   //
