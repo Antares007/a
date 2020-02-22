@@ -25,7 +25,6 @@ void print(bark g) {
   int ident = 0;
   g((void *[]){&ident, (void *[]){g, 0}}, traverse_pith, 0);
 }
-
 int main() {
   print(g41_A_expr);
   return 9;

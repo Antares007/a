@@ -8,10 +8,11 @@ typedef void (*pith_t)(void *, const char *, void *, void *);
 
 #define CCP(n) #n
 #define P CONCAT(N, __LINE__)
-#define S__(b, a, t, n)                                                        \
-  static void n(void *s, pith_t o, void *aa) { o(s, #t, a, b); }
-#define S_(b, a, t, n) S__(b, a, t, n)
-#define S(b, a, t, n) S_(b, t(a), CONCAT3(t, _, a), n)
+#define S__(tail, head, type, name)                                            \
+  static void name(void *b, pith_t o, void *a) { o(b, #type, head, tail); }
+#define S_(tail, head, type, name) S__(tail, head, type, name)
+#define S(tail, head, type, name)                                              \
+  S_(tail, type(head), CONCAT3(type, _, head), name)
 
 #define RGB(name) void T(name)(int *o, const char *b)
 #define RGC(name, c)                                                           \
