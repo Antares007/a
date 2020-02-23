@@ -1,4 +1,4 @@
-#include "n7.c"
+#include "n.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -83,11 +83,7 @@ void lolr(variable_t g, const char *in) { //
                                   (void *)1, 0}},
       lolr_pith);
 }
-// AA
-// aAaA
-// aaAaaA
-// aaaAaaaA
-// aaabaaab
+#include "gaabb.h"
 int main() {
   print(S);
   const char *text = "bab";
