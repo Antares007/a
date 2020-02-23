@@ -3,7 +3,7 @@ typedef void (*pith_t)(void *, const char *, void *, void *);
 #define NN_(a, b) a##b
 #define NN(a, b) NN_(a, b)
 #define N(t, a, n)                                                             \
-  void n(void *b, pith_t o) { o(b, #a, a, t); }
+  void n(void *bs, pith_t o) { o(bs, #a, a, t); }
 #define L NN(n, __LINE__)
 #define RGB(name) void name(int *o, const char *b)
 #define RGC(name, c)                                                           \
@@ -49,13 +49,17 @@ RGC(a, 'a')
 RGC(b, 'b')
 void S(void*, pith_t);
 void A(void*, pith_t);
+#include<stdio.h>
+void _3(){ printf("b\n"); }
+void _2(){ printf("aA\n"); }
+void _1(){ printf("AA\n"); }
 N(0,  // A -> aA / b
-  _,  L)N(L,
+  _3, L)N(L,
   b,  L)N(L,
-  _,  L)N(L,
+  _2, L)N(L,
   A,  L)N(L,
   a,  A)
 N(0,  // S -> AA
-  _,  L)N(L,
+  _1, L)N(L,
   A,  L)N(L,
   A,  S)
