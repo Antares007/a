@@ -49,44 +49,47 @@ void skip_pith(void *b_, const char *n, void *h, void *t) { //
   } else
     ((variable_t)t)(b_, skip_pith);
 }
-
 void lolr_pith(void *b_, const char *n, void *h, void *t) {
   void **b = b_;
   const char *in = b[0];
   void **tail = b[1];
+  void **lpath = b[2];
+  //  printf("%s\n", n);
   if (is_terminal(n)) {
     int len = 9;
     ((terminal_t)h)(&len, in);
     if (len < 0) {
       ((variable_t)t)((void *[]){b_, lolr_pith}, skip_pith);
     } else {
-      ((variable_t)t)((const void *[]){in + len, tail}, lolr_pith);
+      ((variable_t)t)((const void *[]){in + len, tail, 0}, lolr_pith);
     }
   } else if (is_var(n)) {
-    ((variable_t)h)((const void *[]){in, (void *[]){t, tail}}, lolr_pith);
+    if (contains(lpath, h)) {
+      ((variable_t)t)((void *[]){(const void *[]){in, tail, 0}, lolr_pith},
+                      skip_pith);
+    } else {
+      ((variable_t)h)(
+          (const void *[]){in, (void *[]){t, tail}, (void *[]){h, lpath}},
+          lolr_pith);
+    }
   } else {
     ((reducer_t)h)();
-    if (tail[1])
-      ((variable_t)tail[0])((const void *[]){in, tail[1]}, lolr_pith);
-    else if (*in == 0)
+    if (tail)
+      ((variable_t)tail[0])(
+          (const void *[]){in, tail[1], (void *[]){tail[0], 0}}, lolr_pith);
+    else if (*in == '\0')
       printf("accept!\n");
     else
       printf("error!\n");
   }
 }
-
 void lolr(variable_t g, const char *in) { //
-  g(
-      (const void *[]){//
-                       in,
-                       (void *[]){//
-                                  (void *)1, 0}},
-      lolr_pith);
+  g((const void *[]){in, 0, 0}, lolr_pith);
 }
 #include "gaabb.h"
 int main() {
   print(S);
-  const char *text = "bab";
+  const char *text = "abb";
   printf("\n\nparse:\n");
   lolr(S, text);
   return 9;
@@ -108,3 +111,13 @@ bool contains(void **list, void *value) {
       return true;
   return false;
 }
+void _EEplusT() { printf("E->EplusT\n"); }
+void _ET() { printf("E->T\n"); }
+void _TTmulF() { printf("T->TmulF\n"); }
+void _TF() { printf("T->F\n"); }
+void _FlpErp() { printf("F->lpErp\n"); }
+void _Fid() { printf("F->id\n"); }
+
+void _SAA() { printf("S->AA\n"); }
+void _AaA() { printf("A->aA\n"); }
+void _Ab() { printf("A->b\n"); }
