@@ -59,50 +59,44 @@ void skip_pith(void *b_, const char *n, void *h, void *t) { //
   (const void *[]) { in, tail }
 #define Bskip(b, pith)                                                         \
   (void *[]) { b, pith }
-void lolr_pith(void *b_, const char *n, void *h, void *t) {
+#define LOG(...) printf(__VA_ARGS__)
+// clang-format off
+void lolr_pith(void *b_, const char *n, void *h, void *t) { 
   void **b = b_;
   const char *in = b[0];
-  void **tail = b[1];
-  printf("%s\t%s\t- ", n, in);
-  if (is_terminal(n)) {
+  void **tail = b[1];                                       LOG("%.7s\t%s\t", n, in);
+  if (is_terminal(n)) {                                     LOG("T\t");
     int len = 9;
     CT(h)(&len, in);
-    if (len < 0) {
-      printf("skip t\n");
+    if (len < 0) {                                          LOG("skip\n");
       CV(t)(Bskip(Blolr(in, tail), lolr_pith), skip_pith);
-    } else {
-      printf("eat\n");
+    } else {                                                LOG("eat\n");
       CV(t)(Blolr(in + len, tail), lolr_pith);
     }
-  } else if (is_var(n)) {
-    printf(" %s ", contains(tail, t) ? "true" : "false");
-    if (contains(tail, t)) {
-      printf("skip lr\n");
+  } else if (is_var(n)) {                                   LOG("V\t");
+    if (contains(tail, t)) {                                LOG("skip\n");
       CV(t)(Bskip(Blolr(in, tail), lolr_pith), skip_pith);
-    } else {
-      printf("goin\n");
+    } else {                                                LOG("goin\n");
       CV(h)(Blolr(in, Cons(t, tail)), lolr_pith);
     }
-  } else {
-    CR(h)();
-    if (tail) {
-      printf("goin tail\n");
+  } else {                                                  LOG("R\t");
+    //CR(h)();
+    if (tail) {                                             LOG("goin tail\n");
       CV(tail[0])(Blolr(in, tail[1]), lolr_pith);
-    } else if (*in == '\0')
-      printf("accept!\n");
-    else
-      printf("error!\n");
+    } else if (*in == '\0') {                               LOG("accept!\n");
+    } else {                                                LOG("error!\n");
+    }
   }
 }
 void lolr(variable_t g, const char *in) { //
   g(Blolr(in, Nil), lolr_pith);
 }
-#include "gll2.h"
+#include "g42.h"
 int main() {
-  print(S);
-  const char *text = "ab";
+  // print(S);
+  const char *text = "a+b";
   printf("\n\nparse:\n");
-  lolr(S, text);
+  lolr(E, text);
   return 9;
 }
 
@@ -122,6 +116,9 @@ bool contains(void **list, void *value) {
       return true;
   return false;
 }
+void _Eid() { printf("E -> id\n"); }
+void _EEplusE() { printf("E -> E plus E\n"); }
+
 void _EEplusT() { printf("E->EplusT\n"); }
 void _ET() { printf("E->T\n"); }
 void _TTmulF() { printf("T->TmulF\n"); }

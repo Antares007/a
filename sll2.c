@@ -23,37 +23,64 @@ void _ABb();
 void _Aa();
 void _BS();
 
-void n14(void *bs, pith_t o) { o(bs, "_BS", _BS, 0); }
+void n14(void *bs, pith_t o) {
+  o(bs, "_BS", _BS, 0);
+  // 8) "_b" [n23]
+  // reduce
+}
 void B(void *bs, pith_t o) {
   o(bs, "S", S, n14);
-  // 2) "ab" tail[n20,n23] lpath[B,A]
+  // 2) "ab" [n20,n23]
   // goin
 }
 
-void n17(void *bs, pith_t o) { o(bs, "_Aa", _Aa, 0); }
-void n18(void *bs, pith_t o) { o(bs, "a", a, n17); }
+void n17(void *bs, pith_t o) {
+  o(bs, "_Aa", _Aa, 0);
+  // 7) "_b" [n14,n23]
+  // reduce
+}
+void n18(void *bs, pith_t o) {
+  o(bs, "a", a, n17);
+  // 6) "ab" [n14,n23]
+  // eat
+}
 void n19(void *bs, pith_t o) { o(bs, "_ABb", _ABb, n18); }
-void n20(void *bs, pith_t o) { o(bs, "b", b, n19); }
+void n20(void *bs, pith_t o) {
+  o(bs, "b", b, n19);
+  // 5) "ab" [n14,n23]
+  // skip
+}
 void A(void *bs, pith_t o) {
   o(bs, "B", B, n20);
-  // 1) "ab" tail[n23] lpath[A]
+  // 1) "ab" [n23]
   // goin
 }
 
-void n23(void *bs, pith_t o) { o(bs, "_SA", _SA, 0); }
+void n23(void *bs, pith_t o) {
+  o(bs, "_SA", _SA, 0);
+  // 4) "ab" [n20,n14,n23]
+  // reduce
+}
 void S(void *bs, pith_t o) {
   o(bs, "A", A, n23);
-  // 0) "ab" tail[] lpath[]
+  // 0) "ab" []
   // goin
-  // 3) "ab" tail[n14,n20,n23] lpath[S,B,A]
+  // 3) "ab" [n14,n20,n23]
+  // lr n23,
+  // 9) "_b" []
 }
 // A       ab      - goin
 // B       ab      - goin
 // S       ab      - goin
 // A       ab      - skip lr
 // error: cant skip
-// S -> Ab
-// S -> a
+// S -> A
+// A -> Bb
+// A -> a
+// B -> S
 // S
+// A
+// Bb
 // Sb
+// Ab
 // ab
