@@ -49,49 +49,60 @@ void skip_pith(void *b_, const char *n, void *h, void *t) { //
   } else
     ((variable_t)t)(b_, skip_pith);
 }
+#define CV(v) ((variable_t)v)
+#define CT(v) ((terminal_t)v)
+#define CR(v) ((reducer_t)v)
+#define Nil 0
+#define Cons(head, tail)                                                       \
+  (void *[]) { head, tail }
+#define Blolr(in, tail)                                                        \
+  (const void *[]) { in, tail }
+#define Bskip(b, pith)                                                         \
+  (void *[]) { b, pith }
 void lolr_pith(void *b_, const char *n, void *h, void *t) {
   void **b = b_;
   const char *in = b[0];
   void **tail = b[1];
-  void **lpath = b[2];
-  // printf("%s %s\n", n, in);
+  printf("%s\t%s\t- ", n, in);
   if (is_terminal(n)) {
     int len = 9;
-    ((terminal_t)h)(&len, in);
+    CT(h)(&len, in);
     if (len < 0) {
-      ((variable_t)t)((void *[]){b_, lolr_pith}, skip_pith);
+      printf("skip t\n");
+      CV(t)(Bskip(Blolr(in, tail), lolr_pith), skip_pith);
     } else {
-      ((variable_t)t)((const void *[]){in + len, tail, 0}, lolr_pith);
+      printf("eat\n");
+      CV(t)(Blolr(in + len, tail), lolr_pith);
     }
   } else if (is_var(n)) {
-    if (contains(lpath, h)) {
-      ((variable_t)t)((void *[]){(const void *[]){in, tail, 0}, lolr_pith},
-                      skip_pith);
+    printf(" %s ", contains(tail, t) ? "true" : "false");
+    if (contains(tail, t)) {
+      printf("skip lr\n");
+      CV(t)(Bskip(Blolr(in, tail), lolr_pith), skip_pith);
     } else {
-      ((variable_t)h)(
-          (const void *[]){in, (void *[]){t, tail}, (void *[]){h, lpath}},
-          lolr_pith);
+      printf("goin\n");
+      CV(h)(Blolr(in, Cons(t, tail)), lolr_pith);
     }
   } else {
-    ((reducer_t)h)();
-    if (tail)
-      ((variable_t)tail[0])(
-          (const void *[]){in, tail[1], (void *[]){tail[0], 0}}, lolr_pith);
-    else if (*in == '\0')
+    CR(h)();
+    if (tail) {
+      printf("goin tail\n");
+      CV(tail[0])(Blolr(in, tail[1]), lolr_pith);
+    } else if (*in == '\0')
       printf("accept!\n");
     else
       printf("error!\n");
   }
 }
 void lolr(variable_t g, const char *in) { //
-  g((const void *[]){in, 0, 0}, lolr_pith);
+  g(Blolr(in, Nil), lolr_pith);
 }
-#include "g42.h"
+#include "gll2.h"
 int main() {
-  print(E);
-  const char *text = "a+b*b";
+  print(S);
+  const char *text = "ab";
   printf("\n\nparse:\n");
-  lolr(E, text);
+  lolr(S, text);
   return 9;
 }
 
@@ -126,4 +137,9 @@ void _ETE_() { printf("E->TE_\n"); }
 
 void _SAA() { printf("S->AA\n"); }
 void _AaA() { printf("A->aA\n"); }
+
 void _Ab() { printf("A->b\n"); }
+void _BS() { printf("B->S"); }
+void _Aa() { printf("A->a"); }
+void _ABb() { printf("A->Bb"); }
+void _SA() { printf("S->A"); }
