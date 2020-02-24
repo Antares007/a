@@ -1,16 +1,6 @@
 #pragma once
-#include "n.h"
-// clang-format off
-RGB(id) {
-  int i = 0;
-  while ('a' <= b[i] && b[i] <= 'z')
-    i++;
-  *o = i > 0 ? i : -1;
-}
-RGC(plus, '+')
-RGC(mul, '*')
-RGC(lp, '(')
-RGC(rp, ')')
+#include "t.h"
+
 void _Fid();
 void _FlpErp();
 void _TF();
@@ -20,7 +10,7 @@ void _EEplusT();
 void E(void *, pith_t);
 void T(void *, pith_t);
 void F(void *, pith_t);
-
+// clang-format off
 N(0,        // F -> ( E ) / id
   _Fid,     L)N(L,
   id,       L)N(L,

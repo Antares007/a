@@ -54,7 +54,7 @@ void lolr_pith(void *b_, const char *n, void *h, void *t) {
   const char *in = b[0];
   void **tail = b[1];
   void **lpath = b[2];
-  //  printf("%s\n", n);
+  // printf("%s %s\n", n, in);
   if (is_terminal(n)) {
     int len = 9;
     ((terminal_t)h)(&len, in);
@@ -86,12 +86,12 @@ void lolr_pith(void *b_, const char *n, void *h, void *t) {
 void lolr(variable_t g, const char *in) { //
   g((const void *[]){in, 0, 0}, lolr_pith);
 }
-#include "gaabb.h"
+#include "g42.h"
 int main() {
-  print(S);
-  const char *text = "abb";
+  print(E);
+  const char *text = "a+b*b";
   printf("\n\nparse:\n");
-  lolr(S, text);
+  lolr(E, text);
   return 9;
 }
 
@@ -117,6 +117,12 @@ void _TTmulF() { printf("T->TmulF\n"); }
 void _TF() { printf("T->F\n"); }
 void _FlpErp() { printf("F->lpErp\n"); }
 void _Fid() { printf("F->id\n"); }
+void _T_eps() { printf("T_->eps\n"); }
+void _T_mulFT_() { printf("T_->mulFT_\n"); }
+void _TFT_() { printf("T->FT_\n"); }
+void _E_eps() { printf("E_->eps\n"); }
+void _E_plusTE_() { printf("E_->plusTE_\n"); }
+void _ETE_() { printf("E->TE_\n"); }
 
 void _SAA() { printf("S->AA\n"); }
 void _AaA() { printf("A->aA\n"); }
