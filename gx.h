@@ -7,9 +7,9 @@ void _() {}
 // clang-format off
 N(0,
   _,  L)N(L,
-  a,  A)
+  b,  A)
 N(0,
   _,  L)N(L,
-  b,  L)N(L,
+  a,  L)N(L,
   _,  L)N(L,
   A,  S)

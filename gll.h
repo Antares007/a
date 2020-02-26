@@ -3,9 +3,9 @@
 
 void S(void *, pith_t);
 void A(void *, pith_t);
-void _3();
-void _2();
-void _1();
+void _3() {}
+void _2() {}
+void _1() {}
 
 // clang-format off
 N(0,    // A -> a
