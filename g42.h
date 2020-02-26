@@ -1,11 +1,11 @@
 #pragma once
 #include "t.h"
 
-void E(void *, pith_t);
-void E_(void *, pith_t);
-void T(void *, pith_t);
-void T_(void *, pith_t);
-void F(void *, pith_t);
+void E(pith_t, void *);
+void E_(pith_t, void *);
+void T(pith_t, void *);
+void T_(pith_t, void *);
+void F(pith_t, void *);
 void _Fid();
 void _FlpErp();
 void _T_eps();

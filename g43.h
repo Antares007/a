@@ -1,7 +1,7 @@
 #pragma once
 #include "t.h"
 
-void E(void *, pith_t);
+void E(pith_t, void *);
 // clang-format off
 void _Eid();
 void _EEplusE();

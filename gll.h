@@ -1,8 +1,8 @@
 #pragma once
 #include "t.h"
 
-void S(void *, pith_t);
-void A(void *, pith_t);
+void S(pith_t, void *);
+void A(pith_t, void *);
 void _3() {}
 void _2() {}
 void _1() {}

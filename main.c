@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-typedef void (*variable_t)(void *, pith_t);
+typedef void (*variable_t)(pith_t, void *);
 typedef void (*terminal_t)(int *, const char *);
 typedef void (*reducer_t)();
 
@@ -23,26 +23,19 @@ void traverse_pith(void *b_, const char *n, void *h, void *t) {
   if (is_var(n)) {
     b_ = (void *[]){b[0], (void *[]){h, path}};
     if (!contains(path, h))
-      ((*ident)++, ((variable_t)h)(b_, traverse_pith), (*ident)--);
+      ((*ident)++, ((variable_t)h)(traverse_pith, b_), (*ident)--);
   }
   if (t)
-    ((variable_t)t)(b_, traverse_pith);
+    ((variable_t)t)(traverse_pith, b_);
 }
 void print(variable_t g) {
   int ident = 0;
-  g((void *[]){&ident, (void *[]){g, 0}}, traverse_pith);
+  g(traverse_pith, (void *[]){&ident, (void *[]){g, 0}});
 }
 
 #define CV(v) ((variable_t)v)
 #define CT(v) ((terminal_t)v)
 #define CR(v) ((reducer_t)v)
-#define Nil 0
-#define Cons(head, tail)                                                       \
-  (void *[]) { head, tail }
-#define Blolr(in, tail)                                                        \
-  (const void *[]) { in, tail }
-#define Bskip(b, pith)                                                         \
-  (void *[]) { b, pith }
 #define LOG(...) printf(__VA_ARGS__)
 #define VSA(...)                                                               \
   (void *[]) { __VA_ARGS__ }
@@ -57,18 +50,18 @@ void skip_pith(void *sb_, const char *n, void *h, void *t) { //
   if (is_reducer(n)) {
     void **sb = sb_;
     if (t) {
-      CV(t)(sb[0], (pith_t)sb[1]);
+      CV(t)((pith_t)sb[0], sb[1]);
     } else {
-      void **fb = sb[0];
+      void **fb = sb[1];
       const char *in = fb[0];
       void **tail = fb[1];
-      if (tail)
-        CV(tail[0])(VSA(CVSA(in, tail[1]), (pith_t)sb[1]), skip_pith);
+      if (tail) // <----
+        CV(tail[0])(skip_pith, VSA((pith_t)sb[0], CVSA(in, tail[1])));
       else
         printf("error: cant skip\n");
     }
   } else
-    CV(t)(sb_, skip_pith);
+    CV(t)(skip_pith, sb_);
 }
 void follow_pith(void *b_, const char *n, void *h, void *t) {
   void **b = b_;
@@ -79,13 +72,13 @@ void follow_pith(void *b_, const char *n, void *h, void *t) {
     CT(h)(&len, in);
     if (len < 0) {                                    LOG("error\n");
     } else {                                          LOG("eat&follw\n");
-      CV(t)(CVSA(in + len, tail), follow_pith);
+      CV(t)(follow_pith, CVSA(in + len, tail));
     }
   } else if (is_var(n)) {                             LOG("V\tdelegate to first_pith\n");
     first_pith(b_, n, h, t);
   } else {                                            LOG("R\t");
     if(tail) {                                        LOG("reduce\n");
-      CV(tail[0])(CVSA(in, tail[1]), follow_pith);
+      CV(tail[0])(follow_pith, CVSA(in, tail[1])); // <----
     } else if (*in == 0){                             LOG("accept\n");
     } else {                                          LOG("bccept\n");
     }
@@ -99,22 +92,21 @@ void first_pith(void *b_, const char *n, void *h, void *t) { //
     int len = 9;
     CT(h)(&len, in);
     if (len < 0) {                                    LOG("skip\n");
-      CV(t)(VSA(b_, first_pith), skip_pith);
+      CV(t)(skip_pith, VSA(first_pith, b_));
     } else {                                          LOG("eat&follw\n");
-      CV(t)(CVSA(in + len, tail), follow_pith);
+      CV(t)(follow_pith, CVSA(in + len, tail));
     }
   } else if (is_var(n)) {                             LOG("V\t");
     if (contains(tail, t)) {                          LOG("Left recursion not implemented yet!\n");
-      CV(t)(VSA(CVSA(in,  VSA(t, VSA(t, tail))), first_pith), skip_pith);
-      //CV(t)(CVSA(in, VSA(t, tail)), first_pith);
+      CV(t)(skip_pith, VSA(first_pith, CVSA(in,  VSA(t, VSA(t, tail)))));
     } else {                                          LOG("goin\n");
-      CV(h)(CVSA(in, VSA(t, tail)), first_pith);
+      CV(h)(first_pith, CVSA(in, VSA(t, tail)));
     }
   } else {                                            LOG("R\t");
                                                       LOG("error: first cant be reducer\n");
   }
 }
-void lolr(variable_t g, const char *in) { g(Blolr(in, Nil), first_pith); }
+void lolr(variable_t g, const char *in) { g(first_pith, CVSA(in, 0)); }
 #include "gll.h"
 int main() {
   print(S);

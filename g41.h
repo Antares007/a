@@ -7,9 +7,9 @@ void _TF();
 void _ET();
 void _TTmulF();
 void _EEplusT();
-void E(void *, pith_t);
-void T(void *, pith_t);
-void F(void *, pith_t);
+void E(pith_t, void *);
+void T(pith_t, void *);
+void F(pith_t, void *);
 // clang-format off
 N(0,        // F -> ( E ) / id
   _Fid,     L)N(L,
