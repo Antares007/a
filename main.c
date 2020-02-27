@@ -41,13 +41,12 @@ void a_pith(void *s_, const char *n, void *h_, void *t_) { //
   void (*o)(void *, ...) = *s++;
   const char *mode = *s++;
   const char *in = *s++;
-  variable_t *tail = *s++;
+  void **tail = *s++;
   variable_t t = (variable_t)t_;
-
-  o("%.7s\t%s\t", n, in);
+  o("%s\t%.7s\t%s\t", mode, n, in);
   if (t)
     t(print_pith, o);
-  void **list = (void *)tail;
+  void **list = tail;
   o(" [");
   for (; list; list = list[1]) {
     ((variable_t)(*list))(print_pith, o);
@@ -55,14 +54,13 @@ void a_pith(void *s_, const char *n, void *h_, void *t_) { //
       o(", ");
   };
   o("]\n");
-
   if (mode == skip) {
     if ('_' != *n)
       t(a_pith, s_);
     else if (t)
       t(a_pith, (const void *[]){o, first, in, tail});
     else if (tail)
-      tail[0](a_pith, (const void *[]){o, mode, in, tail[1]});
+      ((variable_t)tail[0])(a_pith, (const void *[]){o, mode, in, tail[1]});
     else
       o("error: cant skip\n");
   } else if ('a' <= *n && *n <= 'z') {
@@ -84,7 +82,7 @@ void a_pith(void *s_, const char *n, void *h_, void *t_) { //
     }
   } else if ('_' == *n) {
     if (tail)
-      tail[0](a_pith, (const void *[]){o, follow, in, tail[1]});
+      ((variable_t)tail[0])(a_pith, (const void *[]){o, follow, in, tail[1]});
     else
       o(*in == 0 ? "accept\n" : "bccept\n");
   } else {
@@ -94,8 +92,6 @@ void a_pith(void *s_, const char *n, void *h_, void *t_) { //
 
 // clang-format off
 #include "g42.h"
-void _1() {}
-void _2() {}
 N(0,
  _2,        L)N(L,
   b,        L)N(L,
@@ -123,27 +119,3 @@ int contains(void **list, void *value) {
       return 1;
   return 0;
 }
-void _Eid() { printf("E -> id\n"); }
-void _EEplusE() { printf("E -> E plus E\n"); }
-
-void _EEplusT() { printf("E->EplusT\n"); }
-void _ET() { printf("E->T\n"); }
-void _TTmulF() { printf("T->TmulF\n"); }
-void _TF() { printf("T->F\n"); }
-void _FlpErp() { printf("F->lpErp\n"); }
-void _Fid() { printf("F->id\n"); }
-void _T_eps() { printf("T_->eps\n"); }
-void _T_mulFT_() { printf("T_->mulFT_\n"); }
-void _TFT_() { printf("T->FT_\n"); }
-void _E_eps() { printf("E_->eps\n"); }
-void _E_plusTE_() { printf("E_->plusTE_\n"); }
-void _ETE_() { printf("E->TE_\n"); }
-
-void _SAA() { printf("S->AA\n"); }
-void _AaA() { printf("A->aA\n"); }
-
-void _Ab() { printf("A->b\n"); }
-void _BS() { printf("B->S"); }
-void _Aa() { printf("A->a"); }
-void _ABb() { printf("A->Bb"); }
-void _SA() { printf("S->A"); }
