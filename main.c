@@ -1,26 +1,18 @@
 #include "n.h"
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
 
 typedef void (*variable_t)(pith_t, void *);
 typedef void (*terminal_t)(int *, const char *);
 typedef void (*reducer_t)();
 
-inline bool contains(void **list, void *value);
+inline int contains(void **list, void *value);
 inline void ident_print(int ident, const char *n);
-
-inline bool is_var(const char *n);
-inline bool is_terminal(const char *n);
-inline bool is_reducer(const char *n);
 
 void traverse_pith(void *b_, const char *n, void *h, void *t) {
   void **b = b_;
   int *ident = b[0];
   void **path = b[1];
   ident_print(*ident, n);
-  if (is_var(n)) {
+  if ('A' <= *n && *n <= 'Z') {
     b_ = (void *[]){b[0], (void *[]){h, path}};
     if (!contains(path, h))
       ((*ident)++, ((variable_t)h)(traverse_pith, b_), (*ident)--);
@@ -33,112 +25,74 @@ void print(variable_t g) {
   g(traverse_pith, (void *[]){&ident, (void *[]){g, 0}});
 }
 
-#define CV(v) ((variable_t)v)
-#define CT(v) ((terminal_t)v)
-#define CR(v) ((reducer_t)v)
-#define LOG(...) printf(__VA_ARGS__)
-#define VSA(...)                                                               \
-  (void *[]) { __VA_ARGS__ }
-#define CVSA(...)                                                              \
-  (const void *[]) { __VA_ARGS__ }
-
 void print_pith(void *b, const char *n, void *h, void *t) {
+  void (*o)(void *, ...) = b;
   if (t) {
-    printf("%s.", n);
-    CV(t)(print_pith, b);
+    o("%s.", n);
+    ((variable_t)t)(print_pith, b);
   } else
-    printf("%s", n);
+    o("%s", n);
 }
-void print_state(void *b_, const char *n, void *h, void *t) { //
-  void **b = b_;
-  const char *in = b[0];
-  void **tail = b[1];
-  printf("%.7s\t%s\t", n, in);
+static const char *first = "first";
+static const char *follow = "follow";
+static const char *skip = "skip";
+void a_pith(void *s_, const char *n, void *h_, void *t_) { //
+  void **s = s_;
+  void (*o)(void *, ...) = *s++;
+  const char *mode = *s++;
+  const char *in = *s++;
+  variable_t *tail = *s++;
+  variable_t t = (variable_t)t_;
+
+  o("%.7s\t%s\t", n, in);
   if (t)
-    CV(t)(print_pith, 0);
-  void **list = tail;
-  printf(" [");
+    t(print_pith, o);
+  void **list = (void *)tail;
+  o(" [");
   for (; list; list = list[1]) {
-    CV (*list)(print_pith, 0);
+    ((variable_t)(*list))(print_pith, o);
     if (list[1])
-      printf(", ");
+      o(", ");
   };
-  printf("] ");
-}
-void first_pith(void *b_, const char *n, void *h, void *t);
-void skip_pith(void *sb_, const char *n, void *h, void *t) { //
-  LOG("skip\t");
-  print_state(((void **)sb_)[1], n, h, t);
-  LOG("\n");
-  if (is_reducer(n)) {
-    void **sb = sb_;
-    if (t) {
-      CV(t)((pith_t)sb[0], sb[1]);
-    } else {
-      void **fb = sb[1];
-      const char *in = fb[0];
-      void **tail = fb[1];
-      if (tail)
-        CV(tail[0])(skip_pith, VSA((pith_t)sb[0], CVSA(in, tail[1])));
-      else
-        printf("error: cant skip\n");
-    }
-  } else
-    CV(t)(skip_pith, sb_);
-}
-void follow_pith(void *b_, const char *n, void *h, void *t) {
-  void **b = b_;
-  const char *in = b[0];
-  void **tail = b[1];
-  LOG("follow\t");
-  print_state(b_, n, h, t);
-  LOG("\n");
-  if (is_terminal(n)) {
+  o("]\n");
+
+  if (mode == skip) {
+    if ('_' != *n)
+      t(a_pith, s_);
+    else if (t)
+      t(a_pith, (const void *[]){o, first, in, tail});
+    else if (tail)
+      tail[0](a_pith, (const void *[]){o, mode, in, tail[1]});
+    else
+      o("error: cant skip\n");
+  } else if ('a' <= *n && *n <= 'z') {
+    terminal_t h = h_;
     int len = 9;
-    CT(h)(&len, in);
-    if (len < 0) {
+    h(&len, in);
+    if (len > -1)
+      t(a_pith, (const void *[]){o, follow, in + len, tail});
+    else if (mode == first)
+      t(a_pith, (const void *[]){o, skip, in, tail});
+    else
+      o("error\n");
+  } else if ('A' <= *n && *n <= 'Z') {
+    variable_t h = h_;
+    if (contains((void **)tail, t)) {
+      t(a_pith, (const void *[]){o, skip, in, tail});
     } else {
-      CV(t)(follow_pith, CVSA(in + len, tail));
+      h(a_pith, (const void *[]){o, first, in, (void *[]){t, tail}});
     }
-  } else if (is_var(n)) {
-    first_pith(b_, n, h, t);
+  } else if ('_' == *n) {
+    if (tail)
+      tail[0](a_pith, (const void *[]){o, follow, in, tail[1]});
+    else
+      o(*in == 0 ? "accept\n" : "bccept\n");
   } else {
-    if (tail) {
-      CV(tail[0])(follow_pith, CVSA(in, tail[1]));
-    } else if (*in == 0) {
-      LOG("accept\n");
-    } else {
-      LOG("bccept\n");
-    }
-  }
-}
-void first_pith(void *b_, const char *n, void *h, void *t) {
-  void **b = b_;
-  const char *in = b[0];
-  void **tail = b[1];
-  LOG("first\t");
-  print_state(b_, n, h, t);
-  LOG("\n");
-  if (is_terminal(n)) {
-    int len = 9;
-    CT(h)(&len, in);
-    if (len < 0) {
-      CV(t)(skip_pith, VSA(first_pith, b_));
-    } else {
-      CV(t)(follow_pith, CVSA(in + len, tail));
-    }
-  } else if (is_var(n)) {
-    if (contains(tail, t)) {
-      CV(t)(skip_pith, VSA(first_pith, CVSA(in, tail)));
-    } else {
-      CV(h)(first_pith, CVSA(in, VSA(t, tail)));
-    }
-  } else {
-  }
+    o("error\n");
+  };
 }
 
 // clang-format off
-void lolr(variable_t g, const char *in) { g(first_pith, CVSA(in, 0)); }
 #include "g42.h"
 void _1() {}
 void _2() {}
@@ -148,17 +102,14 @@ N(0,
  _1,        L)N(L,
   a,        L)N(L,
   S,        S)
+#include <stdio.h>
 int main() {
-print(S);
-  const char *text = "ba";
+  print(S);
+  const char *text = "baaaa";
   printf("Parse: %s\n_______________\n", text);
-  lolr(S, text);
+  S(a_pith, (const void *[]){printf, first, text, 0});
   return 9;
 }
-
-bool is_var(const char *n) { return 'A' <= *n && *n <= 'Z'; }
-bool is_reducer(const char *n) { return '_' == *n; }
-bool is_terminal(const char *n) { return !is_var(n) && !is_reducer(n); }
 
 void ident_print(int ident, const char *n) {
   while (ident--)
@@ -166,11 +117,11 @@ void ident_print(int ident, const char *n) {
   printf("%s\n", n);
 }
 
-bool contains(void **list, void *value) {
+int contains(void **list, void *value) {
   for (; list; list = list[1])
     if (list[0] == value)
-      return true;
-  return false;
+      return 1;
+  return 0;
 }
 void _Eid() { printf("E -> id\n"); }
 void _EEplusE() { printf("E -> E plus E\n"); }
