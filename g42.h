@@ -17,18 +17,18 @@ void _8() {}
 // clang-format off
 N(0,          // F -> ( E ) / id
  _8,          L)N(L,
-  id,         L)N(L,
+  i,         L)N(L,
  _7,          L)N(L,
-  rp,         L)N(L,
+  r,         L)N(L,
   E,          L)N(L,
-  lp,         F)
+  l,         F)
 N(0,          // T_-> * F T_ / eps
  _6,          L)N(L,
   eps,        L)N(L,
  _5,          L)N(L,
   T_,         L)N(L,
   F,          L)N(L,
-  mul,        T_)
+  m,        T_)
 N(0,          //T -> F T_
  _4,          L)N(L,
   T_,         L)N(L,
@@ -39,7 +39,7 @@ N(0,          //E_-> + T E_ / eps
  _2,          L)N(L,
   E_,         L)N(L,
   T,          L)N(L,
-  plus,       E_)
+  p,       E_)
 N(0,          //E -> T E_
  _1,          L)N(L,
   E_,         L)N(L,
