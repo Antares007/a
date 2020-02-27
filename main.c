@@ -42,11 +42,34 @@ void print(variable_t g) {
 #define CVSA(...)                                                              \
   (const void *[]) { __VA_ARGS__ }
 
-// b :: [void*, pith_t]
-// clang-format off
+void print_pith(void *b, const char *n, void *h, void *t) {
+  if (t) {
+    printf("%s.", n);
+    CV(t)(print_pith, b);
+  } else
+    printf("%s", n);
+}
+void print_state(void *b_, const char *n, void *h, void *t) { //
+  void **b = b_;
+  const char *in = b[0];
+  void **tail = b[1];
+  printf("%.7s\t%s\t", n, in);
+  if (t)
+    CV(t)(print_pith, 0);
+  void **list = tail;
+  printf(" [");
+  for (; list; list = list[1]) {
+    CV (*list)(print_pith, 0);
+    if (list[1])
+      printf(", ");
+  };
+  printf("] ");
+}
 void first_pith(void *b_, const char *n, void *h, void *t);
 void skip_pith(void *sb_, const char *n, void *h, void *t) { //
-  LOG("spith %s\n", n);
+  LOG("skip\t");
+  print_state(((void **)sb_)[1], n, h, t);
+  LOG("\n");
   if (is_reducer(n)) {
     void **sb = sb_;
     if (t) {
@@ -55,7 +78,7 @@ void skip_pith(void *sb_, const char *n, void *h, void *t) { //
       void **fb = sb[1];
       const char *in = fb[0];
       void **tail = fb[1];
-      if (tail) // <----
+      if (tail)
         CV(tail[0])(skip_pith, VSA((pith_t)sb[0], CVSA(in, tail[1])));
       else
         printf("error: cant skip\n");
@@ -66,51 +89,68 @@ void skip_pith(void *sb_, const char *n, void *h, void *t) { //
 void follow_pith(void *b_, const char *n, void *h, void *t) {
   void **b = b_;
   const char *in = b[0];
-  void **tail = b[1];                                 LOG("follow\t%.7s\t%s\t", n, in);
-  if (is_terminal(n)) {                               LOG("T\t");
+  void **tail = b[1];
+  LOG("follow\t");
+  print_state(b_, n, h, t);
+  LOG("\n");
+  if (is_terminal(n)) {
     int len = 9;
     CT(h)(&len, in);
-    if (len < 0) {                                    LOG("error\n");
-    } else {                                          LOG("eat&follw\n");
+    if (len < 0) {
+    } else {
       CV(t)(follow_pith, CVSA(in + len, tail));
     }
-  } else if (is_var(n)) {                             LOG("V\tdelegate to first_pith\n");
+  } else if (is_var(n)) {
     first_pith(b_, n, h, t);
-  } else {                                            LOG("R\t");
-    if(tail) {                                        LOG("reduce\n");
-      CV(tail[0])(follow_pith, CVSA(in, tail[1])); // <----
-    } else if (*in == 0){                             LOG("accept\n");
-    } else {                                          LOG("bccept\n");
+  } else {
+    if (tail) {
+      CV(tail[0])(follow_pith, CVSA(in, tail[1]));
+    } else if (*in == 0) {
+      LOG("accept\n");
+    } else {
+      LOG("bccept\n");
     }
   }
 }
-void first_pith(void *b_, const char *n, void *h, void *t) { //
+void first_pith(void *b_, const char *n, void *h, void *t) {
   void **b = b_;
   const char *in = b[0];
-  void **tail = b[1];                                 LOG("first\t%.7s\t%s\t", n, in);
-  if (is_terminal(n)) {                               LOG("T\t");
+  void **tail = b[1];
+  LOG("first\t");
+  print_state(b_, n, h, t);
+  LOG("\n");
+  if (is_terminal(n)) {
     int len = 9;
     CT(h)(&len, in);
-    if (len < 0) {                                    LOG("skip\n");
+    if (len < 0) {
       CV(t)(skip_pith, VSA(first_pith, b_));
-    } else {                                          LOG("eat&follw\n");
+    } else {
       CV(t)(follow_pith, CVSA(in + len, tail));
     }
-  } else if (is_var(n)) {                             LOG("V\t");
-    if (contains(tail, t)) {                          LOG("Left recursion not implemented yet!\n");
-      CV(t)(skip_pith, VSA(first_pith, CVSA(in,  VSA(t, VSA(t, tail)))));
-    } else {                                          LOG("goin\n");
+  } else if (is_var(n)) {
+    if (contains(tail, t)) {
+      CV(t)(skip_pith, VSA(first_pith, CVSA(in, tail)));
+    } else {
       CV(h)(first_pith, CVSA(in, VSA(t, tail)));
     }
-  } else {                                            LOG("R\t");
-                                                      LOG("error: first cant be reducer\n");
+  } else {
   }
 }
+
+// clang-format off
 void lolr(variable_t g, const char *in) { g(first_pith, CVSA(in, 0)); }
-#include "gll.h"
+#include "g42.h"
+void _1() {}
+void _2() {}
+N(0,
+ _2,        L)N(L,
+  b,        L)N(L,
+ _1,        L)N(L,
+  a,        L)N(L,
+  S,        S)
 int main() {
-  print(S);
-  const char *text = "aaa";
+print(S);
+  const char *text = "ba";
   printf("Parse: %s\n_______________\n", text);
   lolr(S, text);
   return 9;
