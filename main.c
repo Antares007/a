@@ -33,94 +33,61 @@ void print_pith(void *b, const char *n, void *h, void *t) {
   } else
     o("%s", n);
 }
-static const char *first = "first";
-static const char *follow = "follow";
-static const char *skip = "skip";
-typedef struct {
 
-} state_t;
-void a_pith(void *s_, const char *n, void *h_, void *t_) { //
-  void **s = s_;
-  void (*o)(void *, ...) = *s++;
-  const char *mode = *s++;
-  const char *in = *s++;
-  void **ltail = *s++;
-  void **tail = *s++;
+typedef enum { skip = -1, first = 0, follow = 1 } states;
+typedef struct {
+  void (*o)(void *, ...);
+  const char *in;
+  void **tail;
+  states state;
+} config_t;
+
+void print_config(const config_t *c) {
+  c->o("%d\t%.7s\t", c->state, c->in);
+  void **list = c->tail;
+  c->o("[");
+  for (; list; list = list[1]) {
+    ((variable_t)(*list))(print_pith, c->o);
+    if (list[1])
+      c->o(", ");
+  };
+  c->o("]");
+}
+void a_pith(void *b, const char *n, void *h_, void *t_) { //
+  config_t *c = b;
   variable_t t = (variable_t)t_;
-  if (1) {
-    o("%s\t%.7s\t%s\t", mode, n, in);
-    if (t)
-      t(print_pith, o);
-    void **list = tail;
-    o(" [");
-    for (; list; list = list[1]) {
-      ((variable_t)(*list))(print_pith, o);
-      if (list[1])
-        o(", ");
-    };
-    o("]");
-    list = ltail;
-    o(" [");
-    for (; list; list = list[1]) {
-      ((variable_t)(*list))(print_pith, o);
-      if (list[1])
-        o(", ");
-    };
-    o("]\n");
-  } else
-    o("\n");
-  if (mode == skip) {
+  c->o("%s\t", n);
+  print_config(c);
+  c->o("\n");
+  if (c->state == skip) {
     if ('_' != *n)
-      t(a_pith, s_);
+      t(a_pith, c);
     else if (t)
-      t(a_pith, (const void *[]){o, first, in, ltail, tail});
-    else if (tail)
-      ((variable_t)tail[0])(a_pith,
-                            (const void *[]){o, mode, in, ltail, tail[1]});
+      t(a_pith, (c->state = first, c));
+    else if (c->tail)
+      ((variable_t)c->tail[0])(a_pith, (c->tail = c->tail[1], c));
     else
-      o("error: cant skip\n");
+      c->o("error: cant skip\n");
   } else if ('a' <= *n && *n <= 'z') {
     terminal_t h = h_;
     int len = 9;
-    h(&len, in);
+    h(&len, c->in);
     if (len > -1)
-      t(a_pith, (const void *[]){o, follow, in + len, ltail, tail});
-    else if (mode == first)
-      t(a_pith, (const void *[]){o, skip, in, ltail, tail});
-    // else if (ltail)
-    //  o("hmm");
+      t(a_pith, (c->state = follow, c->in = c->in + len, c));
+    else if (c->state == first)
+      t(a_pith, (c->state = skip, c));
     else
-      o("error aa\n");
+      c->o("error aa\n");
   } else if ('A' <= *n && *n <= 'Z') {
     variable_t h = h_;
-    void **nltail = ltail;
-    void **ntail = tail;
-    int is_lrhead = 0;
-    if (mode == first)
-      while (ntail) {
-        nltail = (void *[]){ntail[0], nltail};
-        is_lrhead = ntail[0] == t;
-        ntail = ntail[1];
-        if (is_lrhead)
-          break;
-      }
-    if (is_lrhead) {
-      o("!!");
-      t(a_pith, (const void *[]){o, skip, in, nltail, ntail});
-    } else
-      h(a_pith, (const void *[]){o, first, in, ltail, (void *[]){t, tail}});
+    h(a_pith, (c->state = first, c->tail = (void *[]){t, c->tail}, c));
   } else if ('_' == *n) {
-    if (tail)
-      ((variable_t)tail[0])(a_pith,
-                            (const void *[]){o, follow, in, ltail, tail[1]});
-    else if (ltail && mode == follow) {
-      o("??");
-      ((variable_t)ltail[0])(a_pith,
-                             (const void *[]){o, first, in, ltail, ltail[1]});
-    } else
-      o(*in == 0 ? "accept\n" : "bccept\n");
+    if (c->tail)
+      ((variable_t)c->tail[0])(a_pith, (c->tail = c->tail[1], c));
+    else
+      c->o(*c->in == 0 ? "accept\n" : "bccept\n");
   } else {
-    o("error\n");
+    c->o("error\n");
   };
 }
 
@@ -172,7 +139,7 @@ int main() {
   const char *text = "aabaa";
   print(v);
   printf("Parse: %s\n_______________\n", text);
-  v(a_pith, (const void *[]){printf, first, text, 0, 0});
+  v(a_pith, &(config_t){.o=(void*)printf, .state=first, .in = text, .tail = 0});
   return 9;
 }
 
