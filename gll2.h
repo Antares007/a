@@ -3,7 +3,6 @@
 
 void S(pith_t, void *);
 void A(pith_t, void *);
-void B(pith_t, void *);
 void _1(){}
 void _2(){}
 void _3(){}

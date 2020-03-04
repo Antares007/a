@@ -1,86 +1,64 @@
 typedef void (*pith_t)(void *, const char *, void *, void *);
-
-void id(int *o, const char *b) {
+void i(int *o, const char *b) {
   int i = 0;
   while ('a' <= b[i] && b[i] <= 'z')
     i++;
   *o = i > 0 ? i : -1;
 }
-void plus(int *o, const char *b) { *o = *b == '+' ? 1 : -1; }
-void mul(int *o, const char *b) { *o = *b == '*' ? 1 : -1; }
-void lp(int *o, const char *b) { *o = *b == '(' ? 1 : -1; }
-void rp(int *o, const char *b) { *o = *b == ')' ? 1 : -1; }
+void p(int *o, const char *b) { *o = *b == '+' ? 1 : -1; }
+void m(int *o, const char *b) { *o = *b == '*' ? 1 : -1; }
+void l(int *o, const char *b) { *o = *b == '(' ? 1 : -1; }
+void r(int *o, const char *b) { *o = *b == ')' ? 1 : -1; }
 
 void a(int *o, const char *b) { *o = *b == 'a' ? 1 : -1; }
 void b(int *o, const char *b) { *o = *b == 'b' ? 1 : -1; }
+void c(int *o, const char *b) { *o = *b == 'c' ? 1 : -1; }
+void d(int *o, const char *b) { *o = *b == 'd' ? 1 : -1; }
 void eps(int *o, const char *b) { *o = 0; }
 
-void S(void *, pith_t);
-void A(void *, pith_t);
-void B(void *, pith_t);
-void _SA();
-void _ABb();
-void _Aa();
-void _BS();
-
-void n14(void *bs, pith_t o) {
-  o(bs, "_BS", _BS, 0);
-  // 8) "_b" [n23]
-  // reduce
-}
-void B(void *bs, pith_t o) {
-  o(bs, "S", S, n14);
-  // 2) "ab" [n20,n23]
-  // goin
-}
-
-void n17(void *bs, pith_t o) {
-  o(bs, "_Aa", _Aa, 0);
-  // 7) "_b" [n14,n23]
-  // reduce
-}
-void n18(void *bs, pith_t o) {
-  o(bs, "a", a, n17);
-  // 6) "ab" [n14,n23]
-  // eat
-}
-void n19(void *bs, pith_t o) { o(bs, "_ABb", _ABb, n18); }
-void n20(void *bs, pith_t o) {
-  o(bs, "b", b, n19);
-  // 5) "ab" [n14,n23]
-  // skip
-}
-void A(void *bs, pith_t o) {
-  o(bs, "B", B, n20);
-  // 1) "ab" [n23]
-  // goin
+void S(pith_t, void *);
+void A(pith_t, void *);
+void n13(pith_t o, void *bs);
+void n14(pith_t o, void *bs);
+void n15(pith_t o, void *bs);
+void n16(pith_t o, void *bs);
+void n19(pith_t o, void *bs);
+void n20(pith_t o, void *bs);
+void n21(pith_t o, void *bs);
+void n22(pith_t o, void *bs);
+void _1() {}
+void _2() {}
+void _3() {}
+void _4() {}
+void P(int, ...);
+#define C(a, b)                                                                \
+  (void *[]) { a, b }
+void n13(pith_t o, void *bs) { o(bs, "_4", _4, 0); }
+void n14(pith_t o, void *bs) { o(bs, "c", c, n13); }
+void n15(pith_t o, void *bs) { o(bs, "_3", _3, n14); }
+void n16(pith_t o, void *bs) { o(bs, "b", b, n15); }
+void A(pith_t o, void *bs) {
+  P(1, "caba", C(A, 0), C(n22, 0));
+  o(bs, "S", S, n16);
 }
 
-void n23(void *bs, pith_t o) {
-  o(bs, "_SA", _SA, 0);
-  // 4) "ab" [n20,n14,n23]
-  // reduce
+void n19(pith_t o, void *bs) { o(bs, "_2", _2, 0); }
+void n20(pith_t o, void *bs) { o(bs, "d", d, n19); }
+void n21(pith_t o, void *bs) { o(bs, "_1", _1, n20); }
+void n22(pith_t o, void *bs) { o(bs, "a", a, n21); }
+void S(pith_t o, void *bs) {
+  P(0, "caba", 0, 0);
+  P(2, "caba", C(S, C(A, 0)), C(n16, C(n22, 0)));
+  o(bs, "A", A, n22);
+
+  P(3, "caba", C(S, C(A, 0)), C(n16, C(n22, 0)));
 }
-void S(void *bs, pith_t o) {
-  o(bs, "A", A, n23);
-  // 0) "ab" []
-  // goin
-  // 3) "ab" [n14,n20,n23]
-  // lr n23,
-  // 9) "_b" []
-}
-// A       ab      - goin
-// B       ab      - goin
-// S       ab      - goin
-// A       ab      - skip lr
-// error: cant skip
-// S -> A
-// A -> Bb
-// A -> a
-// B -> S
-// S
-// A
-// Bb
-// Sb
-// Ab
-// ab
+// S: Aa/d
+// A: Sb/c
+// S': S'ba/ca/d
+//
+//      S     S'
+//     Aa     S'ba
+//    Sba     caba
+//   Aaba
+//   caba

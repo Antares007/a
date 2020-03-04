@@ -1,0 +1,58 @@
+/*
+stmt
+  : if '(' expr ')' stmt [ else stmt ]
+ 	|	while '(' expr ')' stmt
+ 	|	for '(' [ assg ] ';' [ expr ] ';' [ assg ] ')' stmt
+ 	|	return [ expr ] ';'
+ 	|	assg ';'
+ 	|	id '(' [expr { ',' expr } ] ')' ';'
+ 	|	'{' { stmt } '}'
+ 	|	';'
+binop	:	+
+ 	|	–
+ 	|	*
+ 	|	/ 
+expr:	'–' expr
+ 	  |	'!' expr
+ 	  |	expr binop expr
+ 	  |	expr relop expr
+ 	  |	expr logical_op expr
+ 	  |	id_expr
+ 	  |	'(' expr ')'
+ 	  |	intcon
+ 	  |	charcon
+ 	  |	stringcon
+id_expr: id id_op
+id_op: '(' opt_expr_list ')' | '[' expr ']' | ε
+opt_expr_list: expr_list | ε
+expr_list: expr | expr_list, expr
+*/
+    ATG(0,    expr_list,  ε,          _1,
+              opt_expr_list)
+  AGAAG(0,    expr, _1,   expr_list,  expr, _2,
+              expr_list)
+    TTG(0,    id,         ε,          _1,
+L)  AAG(L,    expr,       binop_expr, _1,
+L)  TAG(L,    bang,       expr,       _1,
+L)  TAG(L,    minus,      expr,       _1,
+              expr)
+    TTG(0,    divide,     ε,          _1,
+L)  TTG(L,    mult,       ε,          _1,
+L)  TTG(L,    minus,      ε,          _1,
+L)  TTG(L,    plus,       ε,          _1,
+              binop)
+    AAG(0,    ifexpr,     else_stmt,  _2,
+              if_then_else)
+    TAG(0,    if_lparen,  expr,       _2,
+              ifexpr)
+    TAG(0,    rparen,     stmt,       _2,
+              then_stmt)
+    TTG(0,    ε,          ε,          _2,
+L)  TAG(L,    else,       stmt,       _2,
+            else_stmt)
+
+
+
+
+
+
