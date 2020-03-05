@@ -62,7 +62,8 @@ void print_config(const config_t *c) {
   };
   c->o("]");
 }
-void a_pith(void *b, const char *n, void *h_, void *t_) { //
+void s_pith(void *b, const char *n, void *h_, void *t_);
+void a_pith(void *b, const char *n, void *h_, void *t_) {
   config_t *c = b;
   variable_t t = (variable_t)t_;
   c->o("%s\t", n);
@@ -111,6 +112,18 @@ void a_pith(void *b, const char *n, void *h_, void *t_) { //
   } else {
     c->o("error\n");
   };
+}
+void s_pith(void *b, const char *n, void *h_, void *t_) {
+  config_t *c = b;
+  variable_t t = (variable_t)t_;
+  if ('_' != *n)
+    t(a_pith, c);
+  else if (t)
+    t(a_pith, c);
+  else if (c->tail)
+    ((variable_t)c->tail[0])(a_pith, (c->tail = c->tail[1], c));
+  else
+    c->o("error: cant skip\n");
 }
 
 // clang-format off
@@ -161,7 +174,13 @@ int main() {
   const char *text = "aabaa";
   print(v);
   printf("Parse: %s\n_______________\n", text);
-  v(a_pith, &(config_t){.o=(void*)printf, .state=first, .in = text, .path = (void*[]){v, 0}, .tail = 0});
+  v(a_pith, &(config_t){
+      .o     = (void*)printf,
+      .state = first,
+      .in    = text,
+      .path  = (void*[]){v, 0},
+      .tail  = 0
+      });
   return 9;
 }
 
