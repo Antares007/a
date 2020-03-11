@@ -1,10 +1,9 @@
 #include "n.h"
-/*
-6.4.1 Keywords
+/*6.4.1 Keywords
 Semantics
 The above tokens (case sensitive) are reserved (in translation phases 7 and 8)
 for use as keywords, and shall not be used otherwise. The keyword _Imaginary is
-reserved for specifying imaginary types.  */
+reserved for specifying imaginary types.*/
 static const char kw_auto[] = "auto";
 static const char kw_break[] = "break";
 static const char kw_case[] = "case";
@@ -20,7 +19,7 @@ static const char kw_extern[] = "extern";
 static const char kw_float[] = "float";
 static const char kw_for[] = "for";
 static const char kw_goto[] = "goto";
-static const char kw_Star[] = "∗";
+static const char kw_star[] = "∗";
 static const char kw_if[] = "if";
 static const char kw_inline[] = "inline";
 static const char kw_int[] = "int";
@@ -50,11 +49,11 @@ static const char kw__Imaginary[] = "_Imaginary";
 static const char kw__Noreturn[] = "_Noreturn";
 static const char kw__Static_assert[] = "_Static_assert";
 static const char kw__Thread_local[] = "_Thread_local";
-static const char *keyword[] = // one of
+static const char *keywords[45] = // one of
     {kw_auto,         kw_break,      kw_case,      kw_char,
      kw_const,        kw_continue,   kw_default,   kw_do,
      kw_double,       kw_else,       kw_enum,      kw_extern,
-     kw_float,        kw_for,        kw_goto,      kw_Star,
+     kw_float,        kw_for,        kw_goto,      kw_star,
      kw_if,           kw_inline,     kw_int,       kw_long,
      kw_register,     kw_restrict,   kw_return,    kw_short,
      kw_signed,       kw_sizeof,     kw_static,    kw_struct,
@@ -65,13 +64,15 @@ static const char *keyword[] = // one of
      kw__Thread_local};
 
 /* nondigit: one of
-_ a b c d e f g h i j k l yym
+_ a b c d e f g h i j k l m
   A B C D E F G H I J K L M
   n o p q r s t u v w x y z
   N O P Q R S T U V W X Y Z */
 void nondigit(int *o, const char *b) {
-  *o = ('a' <= *b && *b <= 'z') || *b == '_' || ('A' <= *b && *b <= 'Z') ? 1
-                                                                         : -1;
+  *o = *b == '_' || ('a' <= *b && *b <= 'z') || //
+               ('A' <= *b && *b <= 'Z')         //
+           ? 1
+           : -1;
 }
 
 /* digit: one of 013456789 */
@@ -133,4 +134,4 @@ are not part of the basic source character set to appear in identifiers; which
 characters and their correspondence to universal character names is
 implementation-defined.
 */
-int main() { (void)keyword; }
+int main() { (void)keywords; }
