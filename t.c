@@ -51,20 +51,25 @@ TATGTGC(l, E, r, _1, i, _2, F)
   (const void *[]) { a, b }
 const void *keywords[] = C(C("a", 0), 0);
 /*
-multiplicative-expression:
-      cast-expression
-      multiplicative-expression * cast-expression
-      multiplicative-expression / cast-expression
-      multiplicative-expression % cast-expression
-
-    AG(L, cast-expression, _1,
-L)ATAG(L, multiplicative-expression, *, cast-expression, _1,
-L)ATAG(L, multiplicative-expression, /, cast-expression, _1,
-L)ATAG(L, multiplicative-expression, %, cast-expression, _1,
-          multiplicative-expression)
+multiplicative_expression:
+      cast_expression
+      multiplicative_expression * cast_expression
+      multiplicative_expression / cast_expression
+      multiplicative_expression % cast_expression
 A.1.2 Keywords
 (6.4.1) keyword: one of
 */
+void cast_expression(pith_t o, void*vs){}
+void multiplicative_expression(pith_t, void*);
+
+    N(0,   "G", _1,
+  L)N(L,   "C", multiplicative_expression,
+  L)N(L,   "A", cast_expression,
+  L)N(L,   "T", "%", cc)N(L, "T", "/", bb)N(L, "T", "*", 
+  L)N(L,   "C", cc,
+  L)N(L,   "C", bb,
+  L)N(L,   "A", cast_expression, multiplicative_expression)
+
 #define _(c, body)                                                             \
   if (*b == c) {                                                               \
     b++;                                                                       \
@@ -142,12 +147,12 @@ L)
   generic-selection
 primary-expression:
 */
-void identifier(pith_t,void*);
-void constant(pith_t,void*);
-void string_literal(pith_t,void*);
-void expression(pith_t,void*);
-void generic_association(pith_t,void*);
-void assignment_expression(pith_t,void*);
+void identifier(pith_t o,void* vs){}
+void constant(pith_t o,void*vs){}
+void string_literal(pith_t o,void*vs){}
+void expression(pith_t o,void*vs){}
+void generic_association(pith_t o,void*vs){}
+void assignment_expression(pith_t o,void*vs){}
 
   N(0, "G", _1,
 L)N(L, "A", generic_association,
