@@ -114,20 +114,43 @@ universal_character_name)
       L)AG(L, nondigit, _,
 identifier_nondigit)
 
-void identifier(pith_t,void*);
+void identifier(pith_t,  void *);
         AG(0, identifier_nondigit, _,
      L)AAG(L, identifier, identifier_nondigit, _,
      L)AAG(L, identifier, digit, _,
 identifier)
-/*
 
+extern int printf(const char *restrict __format, ...);
+#define C(a, b) (const void *[]) { a, b }
+
+void pith(void *vs[], const char *n, void *h, void *t) {
+  if( n[0] == 'A' ) {
+    void **l = vs;
+    while(l) {
+      if( l[0] == h ) printf( "%d", l[0] == h );
+      l = l[1];
+    }
+  }
+  printf("\t%s\n", n);
+}
+
+int main() {
+  identifier(pith, C(identifier, 0));
+  return 99;
+}
+
+static void * enumeration_constant, * floating_constant, * character_constant, * integer_constant;
+
+        AG(0, enumeration_constant, _,
+      L)AG(L, floating_constant, _,
+      L)AG(L, character_constant, _,
+      L)AG(L, integer_constant, _,
+constant)
+
+
+/*
 A.1.5 Constants
 
-constant:
-  integer_constant
-  floating_constant
-  enumeration_constant
-  character_constant
 integer_constant:
   decimal_constant integer_suffix?opt
   octal_constant integer_suffix?opt
