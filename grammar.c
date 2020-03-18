@@ -109,11 +109,9 @@ hex_quad)
        TAG(0, "\\u", hex_quad, _,
     L)TAAG(L, "\\U", hex_quad, hex_quad, _,
 universal_character_name)
-
         AG(0, universal_character_name, _,
       L)AG(L, nondigit, _,
 identifier_nondigit)
-
 void identifier(pith_t*);
         AG(0, identifier_nondigit, _,
      L)AAG(L, identifier, identifier_nondigit, _,
@@ -123,7 +121,9 @@ identifier)
 extern int printf(const char *restrict __format, ...);
 #define C(a, b) (const void *[]) { a, b }
 
-void pith(pith_t *p, const char *n, void *h, void *t) {
+NT(pith2_t, void (*o)(struct pith2_t*, const char *, void *, void *); void *l1; void *l2;)
+
+void pith(pith2_t *p, const char *n, void *h, void *t) {
   if( n[0] == 'A' ) {
     //void **l = vs;
     //while(l) {
@@ -134,8 +134,9 @@ void pith(pith_t *p, const char *n, void *h, void *t) {
   printf("\t%s\n", n);
 }
 
+
 int main() {
-  identifier(&(pith_t){pith});
+  identifier((pith_t*)&(pith2_t){pith, 0, 0});
   return 99;
 }
 
@@ -319,7 +320,7 @@ postfix_expression:
   postfix_expression . identifier
   postfix_expression -> identifier
   postfix_expression ++
-  postfix_expression __
+  postfix_expression --
   ( type_name ) { initializer_list }
   ( type_name ) { initializer_list , }
 argument_expression_list:

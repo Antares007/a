@@ -1,12 +1,12 @@
 #pragma once
 // clang-format off
-
-typedef struct this {
-  void (*o)(struct this*, const char *, void *, void *);
-} pith_t;
-
 #define NN_(a, b) a##b
 #define NN(a, b) NN_(a, b)
+
+#define NT(t, b) typedef struct t { b } t;
+
+NT(pith_t, void (*o)(struct pith_t*, const char *, void *, void *);)
+
 #define N(tail, type, head, name)           \
   void name(pith_t *o) { o->o(o, type #head, head, tail); }
 #define L NN(n, __LINE__)
