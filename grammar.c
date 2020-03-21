@@ -119,24 +119,39 @@ void identifier(pith_t*);
 identifier)
 
 extern int printf(const char *restrict __format, ...);
-#define C(a, b) (const void *[]) { a, b }
+#define C(...) (const void *[]) { __VA_ARGS__ }
 
 NT(pith2_t, void (*o)(struct pith2_t*, const char *, void *, void *); void *l1; void *l2;)
+typedef void (*bark_t)(pith2_t*);
 
 void pith(pith2_t *p, const char *n, void *h, void *t) {
-  if( n[0] == 'A' ) {
-    //void **l = vs;
-    //while(l) {
-    //  if( l[0] == h ) printf( "%d", l[0] == h );
-    //  l = l[1];
-    //}
+  if(*n == 'A') {
+    void **l = p->l1;
+    int found = 0;
+    for(; l && !found; l = l[1]) found = l[0] == h;
+    if(!found) {
+      p->l1 = C(h, p->l1);
+      p->l2 = C(n + 1, h, p->l2);
+    }
   }
-  printf("\t%s\n", n);
+  if(*n =='G') 
+    printf("\n  ");
+  else 
+    printf("%s ", n+1);
+  if(t) 
+    ((bark_t)t)(p);
+  else if (p->l2){
+    void **rest = p->l2;
+    p->l2 = rest[2];
+    printf("\n%s:\n  ", rest[0]);
+    ((bark_t)rest[1])(p);
+  }
 }
 
 
 int main() {
-  identifier((pith_t*)&(pith2_t){pith, 0, 0});
+  printf("identifier:\n  ");
+  identifier((pith_t*)&(pith2_t){pith, C(identifier, 0), 0});
   return 99;
 }
 
