@@ -31,6 +31,12 @@ NT(pith_t, void (*o)(struct pith_t*, const char *, void *, void *);)
   "A", a3, NN(n, _a3))N(NN(n, _a3),          \
   "A", a2, NN(n, _a2))N(NN(n, _a2),          \
   "T", t1, n)
+#define TATG(tail, t1, a2, t3, g4, n)        \
+  N(tail,                                    \
+  "G", g4, NN(n, _g4))N(NN(n, _g4),          \
+  "T", t3, NN(n, _t3))N(NN(n, _t3),          \
+  "A", a2, NN(n, _a2))N(NN(n, _a2),          \
+  "T", t1, n)
 #define TAG(tail, t1, a2, g3, n)             \
   N(tail,                                    \
   "G", g3, NN(n, _g3))N(NN(n, _g3),          \

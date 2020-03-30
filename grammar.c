@@ -99,6 +99,8 @@ nondigit)
       L)TG(L, "3", _,
       L)TG(L, "2", _,
       L)TG(L, "1", _,
+nonzero_digit)
+        AG(0, nonzero_digit, _,
       L)TG(L, "0", _,
 digit)
         AG(0, en_alfa_af, _,
@@ -148,32 +150,50 @@ void pith(pith2_t *p, const char *n, void *h, void *t) {
   }
 }
 
-
 int main() {
   printf("identifier:\n  ");
   identifier((pith_t*)&(pith2_t){pith, C(identifier, 0), 0});
   return 99;
 }
 
-static void * enumeration_constant, * floating_constant, * character_constant, * integer_constant;
+static void
+            *integer_suffix,
+            *octal_constant,
+            *hexadecimal_constant,
+            *c_char_sequence,
+            *hexadecimal_floating_constant,
+            *decimal_floating_constant
+            ;
 
+        AG(0, nonzero_digit, _,
+     L)AAG(L, decimal_constant, digit, _,
+decimal_constant)
+        AG(0, identifier, _,
+enumeration_constant)
+        AG(0, hexadecimal_floating_constant, _,
+      L)AG(L, decimal_floating_constant, _,
+floating_constant)
+      TATG(0, "U'", c_char_sequence, "'", _,
+    L)TATG(L, "u'", c_char_sequence, "'", _,
+    L)TATG(L, "L'", c_char_sequence, "'", _,
+    L)TATG(L,  "'", c_char_sequence, "'", _,
+character_constant)
+        AG(0, octal_constant, _,
+     L)AAG(L, octal_constant, integer_suffix, _,
+     L) AG(L, hexadecimal_constant, _,
+     L)AAG(L, hexadecimal_constant, integer_suffix, _,
+     L) AG(L, decimal_constant, _,
+     L)AAG(L, decimal_constant, integer_suffix, _,
+integer_constant)
         AG(0, enumeration_constant, _,
       L)AG(L, floating_constant, _,
       L)AG(L, character_constant, _,
       L)AG(L, integer_constant, _,
 constant)
 
-
 /*
 A.1.5 Constants
 
-integer_constant:
-  decimal_constant integer_suffix?opt
-  octal_constant integer_suffix?opt
-  hexadecimal_constant integer_suffix?opt
-decimal_constant:
-  nonzero_digit
-  decimal_constant digit
 octal_constant:
   0
   octal_constant octal_digit
@@ -197,9 +217,6 @@ long_suffix: one of
   l L
 long_long_suffix: one of
   ll LL
-floating_constant:
-  decimal_floating_constant
-  hexadecimal_floating_constant
 decimal_floating_constant:
   fractional_constant exponent_part?opt floating_suffix?opt
   digit_sequence exponent_part floating_suffix?opt
@@ -228,13 +245,6 @@ hexadecimal_digit_sequence:
   hexadecimal_digit_sequence hexadecimal_digit
 floating_suffix: one of
   f l F L
-enumeration_constant:
-  identifier
-character_constant:
-  ' c_char_sequence '
-  L' c_char_sequence '
-  u' c_char_sequence '
-  U' c_char_sequence '
 c_char_sequence:
   c_char
   c_char_sequence c_char
