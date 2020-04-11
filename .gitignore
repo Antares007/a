@@ -1,0 +1,8 @@
+build/
+out/
+*.out
+*.gch
+tags
+*.o
+*.bin
+*.img
